@@ -18,6 +18,8 @@ $.ns('game.untangle');
 	
 	var untangle = {
 		
+		ctx : null,
+		
 		circles : [],
 		
 		lines : [],
@@ -28,7 +30,27 @@ $.ns('game.untangle');
 		boldLineWidth : 5,
 		
 		init : function(){
-			this.drawRadomCircle(5,10);
+			var canvas = $('#game');
+			var ctx = canvas[0].getContext('2d');
+			this.ctx = ctx;
+			this._load();
+		},
+		
+		_load : function(){
+			
+			var bg = new Image(),
+				that = this;
+			that.bg = bg;
+			bg.onload = function(){
+				that._drawBg(bg);
+			};
+			
+			bg.src = 'images/board.png';
+		},
+		
+		_gameStart : function(){
+		
+			this.drawRadomCircle(5,20);
 			this.linkCircles();
 			this._addEvent();
 			this._gameLoop();
@@ -38,12 +60,38 @@ $.ns('game.untangle');
 			var that = this;
 			var canvas = $('#game');
 			var ctx = canvas[0].getContext('2d');
+			this.ctx = ctx;
 			setTimeout(function(){
 				that.clear(canvas[0]);
+				//that._fillBg();
+				that._fillTitle();
 				that.drawAllCircles();
 				that.linkCircles();
+				that._drawBg(that.bg);
 				setTimeout(arguments.callee,30);
 			},30);
+		},
+		
+		_drawBg : function(bg){
+			this.ctx.drawImage(bg,0,0);
+		},
+		
+		_fillBg : function(){
+			
+			var ctx = $('#game')[0].getContext('2d');
+			var bg_gradient = ctx.createLinearGradient(0,0,0,ctx.canvas.height);
+			bg_gradient.addColorStop(0,'#000000');
+			bg_gradient.addColorStop(1,'#555555');
+			ctx.fillStyle = bg_gradient;
+			ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+		},
+		
+		_fillTitle : function(){
+			var ctx = $('#game')[0].getContext('2d');
+			ctx.font = '26px Arial';
+			ctx.textAlign = 'left';
+			ctx.fillStyle = '#fff';
+			ctx.fillText('Untangle Game',ctx.canvas.width/2,50);
 		},
 		
 		_addEvent : function(){
@@ -190,7 +238,10 @@ $.ns('game.untangle');
 		},
 		
 		drawCircle : function(ctx,x,y,radius){
-			ctx.fillStyle = "rgba(200,200,100,.6)";
+			var circel_gradient = ctx.createRadialGradient(x - 10,y - 10,1,x,y,radius);
+			circel_gradient.addColorStop(0,'#fff');
+			circel_gradient.addColorStop(1,'#ccf');
+			ctx.fillStyle = circel_gradient;
 			ctx.beginPath();
 			ctx.arc(x,y,radius,0,Math.PI*2,true);
 			ctx.closePath();
